@@ -1,0 +1,7 @@
+{
+  "name": "DocuMind",
+  "description": "Enterprise-grade multimodal document intelligence system for visual extraction, semantic analysis, and automated code generation from documents.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
