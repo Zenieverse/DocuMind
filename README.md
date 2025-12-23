@@ -146,9 +146,7 @@ A ≤5-minute demo video showcasing:
 
 ## 👤 Author
 
-**Pro Builder**  
-ERNIE & PaddlePaddle Innovation Challenge 2025
-
+Zenieverse
 ---
 
 ## 📄 License
