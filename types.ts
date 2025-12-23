@@ -1,19 +1,15 @@
 
 export enum ProcessingStep {
   IDLE = 'IDLE',
-  UPLOADING = 'UPLOADING',
-  OCR_EXTRACTING = 'OCR_EXTRACTING', // Mapping PaddleOCR-VL
-  SEMANTIC_ANALYSIS = 'SEMANTIC_ANALYSIS', // Mapping ERNIE 4.5
-  MULTIMODAL_REASONING = 'MULTIMODAL_REASONING', // Mapping ERNIE 5
+  PROCESSING = 'PROCESSING',
+  OCR_EXTRACTING = 'OCR_EXTRACTING',
+  SEMANTIC_ANALYSIS = 'SEMANTIC_ANALYSIS',
+  MULTIMODAL_REASONING = 'MULTIMODAL_REASONING',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED'
 }
 
-export interface DocumentEntity {
-  type: string;
-  value: string;
-  confidence: number;
-}
+export type AppMode = 'DOC_INTEL' | 'CREATIVE' | 'LIVE_VOICE' | 'CHAT' | 'VIDEO' | 'TRANSCRIPTION';
 
 export interface AnalysisResult {
   markdown: string;
@@ -22,10 +18,11 @@ export interface AnalysisResult {
     title: string;
     content: string;
     riskScore: number;
-    entities: DocumentEntity[];
+    entities: { type: string; value: string; confidence: number }[];
   }[];
   explanation: string;
   websiteCode?: string;
+  groundingUrls?: { web?: { uri: string; title: string }; maps?: { uri: string; title: string } }[];
 }
 
 export interface AppState {
