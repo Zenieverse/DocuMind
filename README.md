@@ -6,7 +6,9 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1sCct1KFtqaNtD0cTgFSBWUIhZtbx94qG
+View your app in AI Studio: https://ai.studio/apps/drive/1sCct1KFtqaNtD0cTgFSBWUIhZtbx94qG?fullscreenApplet=true
+
+or https://poe.com/DocMindAI
 
 ## Run Locally
 
