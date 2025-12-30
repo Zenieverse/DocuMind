@@ -18,11 +18,13 @@ const extractJSON = (text: string) => {
   }
 };
 
+/**
+ * Creates a fresh AI client instance. 
+ */
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
  * Enterprise Document/Media Intelligence
- * Handles documents, images, and videos for extraction and analysis.
  */
 export const processMultimodalIntel = async (
   base64Data: string,
@@ -36,6 +38,7 @@ export const processMultimodalIntel = async (
 ) => {
   const ai = getAI();
   const tools: any[] = [];
+  
   if (config.useSearch) tools.push({ googleSearch: {} });
   if (config.useMaps) tools.push({ googleMaps: {} });
 
@@ -43,37 +46,35 @@ export const processMultimodalIntel = async (
     tools,
   };
 
-  // Maps grounding is supported in Gemini 2.5 series. 
-  // responseMimeType is not allowed when using the googleMaps tool.
   if (!config.useMaps) {
     generationConfig.responseMimeType = "application/json";
   }
 
-  // Thinking budget for complex reasoning tasks
   if (config.useThinking) {
     generationConfig.thinkingConfig = { thinkingBudget: 32768 };
   }
 
+  const modelName = config.useMaps ? 'gemini-2.5-flash-latest' : 'gemini-3-pro-preview';
+
   const response = await ai.models.generateContent({
-    model: config.useMaps ? 'gemini-2.5-flash-latest' : 'gemini-3-pro-preview',
+    model: modelName,
     contents: [
       {
         parts: [
           { inlineData: { data: base64Data, mimeType } },
-          { text: `DocuMind AI Multimodal Analysis Task: ${userIntent}. 
-            
-            Pipeline Strategy:
-            1. Extraction: If video/image, use high-resolution visual processing. If document, use structure extraction.
-            2. Semantic Layer: Identify entities, relationships, and inconsistencies.
-            3. Risk/Compliance: Check for anomalies or missing critical information.
+          { text: `DocuMind AI Protocol: ${userIntent}. 
+            Execute multi-step intelligence:
+            1. Visual Parse: Extract structures, tables, and raw text.
+            2. Semantic Layer: Identify entities (names, organizations, risks).
+            3. Rationalization: Synthesize findings into human-level reasoning.
             
             Return strictly valid JSON: 
             {
-              "markdown": "Clean documentation of findings",
+              "markdown": "Complete documentation of the media content",
               "jsonSchema": { "type": "object", "properties": {} },
-              "sections": [{"title": "Component", "content": "Findings", "riskScore": 0.0-1.0, "entities": []}],
-              "explanation": "Human-readable reasoning and summary",
-              "websiteCode": "Optional single-file Tailwind HTML prototype if requested"
+              "sections": [{"title": "Node Name", "content": "Findings", "riskScore": 0.0, "entities": []}],
+              "explanation": "Summarized enterprise-grade insights",
+              "websiteCode": "If the intent suggests a UI, provide a complete single-file Tailwind HTML prototype."
             }` 
           }
         ]
@@ -89,7 +90,42 @@ export const processMultimodalIntel = async (
 };
 
 /**
- * Creative Suite: Image Generation (Pro)
+ * Explore Hugging Face Content
+ */
+export const exploreHuggingFace = async (query: string) => {
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-pro-preview',
+    contents: `Retrieve the latest trending content from Hugging Face related to: ${query}. 
+    Focus on Models, Datasets, and Spaces. Provide a structured summary.
+    
+    Return strictly valid JSON:
+    {
+      "explanation": "Brief overview of current HF trends for this query",
+      "items": [
+        {
+          "type": "model" | "dataset" | "space",
+          "name": "Full name of the resource",
+          "description": "Short summary",
+          "tags": ["tag1", "tag2"],
+          "url": "huggingface.co/path"
+        }
+      ]
+    }`,
+    config: {
+      tools: [{ googleSearch: {} }],
+      responseMimeType: "application/json"
+    }
+  });
+
+  return {
+    data: extractJSON(response.text || '{}'),
+    grounding: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
+  };
+};
+
+/**
+ * Pro Image Generation
  */
 export const generateImagePro = async (prompt: string, aspectRatio: string, imageSize: string) => {
   const ai = getAI();
@@ -97,18 +133,21 @@ export const generateImagePro = async (prompt: string, aspectRatio: string, imag
     model: 'gemini-3-pro-image-preview',
     contents: { parts: [{ text: prompt }] },
     config: {
-      imageConfig: { aspectRatio: aspectRatio as any, imageSize: imageSize as any }
+      imageConfig: { 
+        aspectRatio: aspectRatio as any, 
+        imageSize: imageSize as any 
+      }
     },
   });
   
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
-  throw new Error("No image generated.");
+  throw new Error("Target generation failed.");
 };
 
 /**
- * Creative Suite: Image Editing (Flash)
+ * Flash Image Editing
  */
 export const editImageFlash = async (base64Image: string, mimeType: string, prompt: string) => {
   const ai = getAI();
@@ -125,11 +164,11 @@ export const editImageFlash = async (base64Image: string, mimeType: string, prom
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
-  throw new Error("Editing failed.");
+  throw new Error("Visual modulation failed.");
 };
 
 /**
- * Creative Suite: Video Generation (Veo)
+ * Veo Video Generation
  */
 export const generateVideoVeo = async (prompt: string, imageBase64?: string, mimeType?: string, aspectRatio: '16:9' | '9:16' = '16:9') => {
   const ai = getAI();
@@ -154,7 +193,7 @@ export const generateVideoVeo = async (prompt: string, imageBase64?: string, mim
 };
 
 /**
- * Transcription Engine
+ * Audio Transcription Engine
  */
 export const transcribeAudio = async (base64Audio: string, mimeType: string) => {
   const ai = getAI();
@@ -164,7 +203,7 @@ export const transcribeAudio = async (base64Audio: string, mimeType: string) => 
       {
         parts: [
           { inlineData: { data: base64Audio, mimeType } },
-          { text: "Output ONLY a precise transcription of this audio. No commentary." }
+          { text: "Precisely transcribe this audio. Return ONLY the transcription." }
         ]
       }
     ]
@@ -173,7 +212,7 @@ export const transcribeAudio = async (base64Audio: string, mimeType: string) => 
 };
 
 /**
- * TTS Engine
+ * Text-to-Speech Generation
  */
 export const generateTTS = async (text: string) => {
   const ai = getAI();
@@ -182,13 +221,16 @@ export const generateTTS = async (text: string) => {
     contents: [{ parts: [{ text }] }],
     config: {
       responseModalities: [Modality.AUDIO],
-      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+      speechConfig: { 
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } 
+      }
     },
   });
   return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 };
 
-// Encoding/Decoding Utilities for Live API
+// --- Audio Stream Processing Utils ---
+
 export const decodeBase64Audio = (base64: string) => {
   const binaryString = atob(base64);
   const len = binaryString.length;

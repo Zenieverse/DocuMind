@@ -9,7 +9,7 @@ export enum ProcessingStep {
   FAILED = 'FAILED'
 }
 
-export type AppMode = 'DOC_INTEL' | 'CREATIVE' | 'LIVE_VOICE' | 'CHAT' | 'VIDEO' | 'TRANSCRIPTION';
+export type AppMode = 'DOC_INTEL' | 'CREATIVE' | 'LIVE_VOICE' | 'CHAT' | 'VIDEO' | 'TRANSCRIPTION' | 'HUGGING_FACE';
 
 export interface AnalysisResult {
   markdown: string;
