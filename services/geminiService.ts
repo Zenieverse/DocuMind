@@ -1,21 +1,37 @@
 
 import { GoogleGenAI, Type, Modality, GenerateContentResponse } from "@google/genai";
 
-// Standard helper to extract JSON from model responses which might include markdown blocks
+// Standard helper to extract JSON and sanitize generated data
 const extractJSON = (text: string) => {
   try {
-    return JSON.parse(text);
+    const raw = JSON.parse(text);
+    return sanitizeResults(raw);
   } catch (e) {
     const match = text.match(/\{[\s\S]*\}/);
     if (match) {
       try {
-        return JSON.parse(match[0]);
+        const raw = JSON.parse(match[0]);
+        return sanitizeResults(raw);
       } catch (inner) {
         throw new Error("Failed to parse response JSON");
       }
     }
     throw new Error("No valid JSON found in response");
   }
+};
+
+/**
+ * Sanitizes results to fix common AI halluncinations like malformed URLs
+ */
+const sanitizeResults = (data: any) => {
+  if (data.items && Array.isArray(data.items)) {
+    data.items = data.items.map((item: any) => ({
+      ...item,
+      // Strip newlines, spaces, and %0A from URLs
+      url: item.url ? item.url.replace(/[\n\r\t]/g, '').replace(/%0A/g, '').trim() : ''
+    }));
+  }
+  return data;
 };
 
 /**

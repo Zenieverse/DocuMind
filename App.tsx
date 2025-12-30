@@ -27,8 +27,8 @@ const App: React.FC = () => {
   const [imageSize, setImageSize] = useState('1K');
   const [creativeOutput, setCreativeOutput] = useState<string | null>(null);
 
-  // Hugging Face Integration
-  const [hfQuery, setHfQuery] = useState('DeepSeek-V3');
+  // Hugging Face Integration - Default to zenieverse
+  const [hfQuery, setHfQuery] = useState('zenieverse');
   const [hfResults, setHfResults] = useState<{ explanation: string; items: any[]; groundingUrls: any[] } | null>(null);
 
   // Chat / Conversations
@@ -46,6 +46,11 @@ const App: React.FC = () => {
   const [transcriptionResult, setTranscriptionResult] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Valid Project Links
+  const REPO_URL = "https://huggingface.co/zenieverse/DocuMind-ERNIE4.5-Document-Reasoning";
+  const GITHUB_URL = "https://github.com/Zenieverse/DocuMind";
+  const PROFILE_URL = "https://huggingface.co/zenieverse";
 
   // Initial setup check for API key
   useEffect(() => {
@@ -300,15 +305,22 @@ const App: React.FC = () => {
           </nav>
 
           <div className="flex items-center gap-3">
+             <a 
+              href={REPO_URL} 
+              target="_blank" 
+              className="px-3 py-1.5 bg-cyan-600/10 border border-cyan-500/20 rounded-lg text-[9px] font-bold text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all uppercase tracking-widest"
+             >
+               MODEL REPO
+             </a>
              {!isKeySetup && (
                 <button 
                   onClick={ensureApiKey}
                   className="px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-[9px] font-bold text-yellow-500 hover:bg-yellow-500 hover:text-white transition-all"
                 >
-                  SETUP KEY
+                  KEY
                 </button>
              )}
-             <button onClick={() => handleTTSNarration("System fully operational. Awaiting command.")} className="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400 hover:text-white transition-all shadow-lg">
+             <button onClick={() => handleTTSNarration("System fully operational. Protocol zenieverse engaged.")} className="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400 hover:text-white transition-all shadow-lg">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
              </button>
           </div>
@@ -354,11 +366,11 @@ const App: React.FC = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">HF Resource Query</label>
-                  <input value={hfQuery} onChange={e => setHfQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && exploreHf()} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none focus:border-cyan-500/50 transition-all font-mono" placeholder="e.g. LLM, Vision, Audio..." />
+                  <input value={hfQuery} onChange={e => setHfQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && exploreHf()} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none focus:border-cyan-500/50 transition-all font-mono" placeholder="Search zenieverse or other models..." />
                 </div>
-                <button onClick={exploreHf} className="w-full bg-yellow-600 hover:bg-yellow-500 text-white py-3.5 rounded-xl font-black text-[10px] tracking-widest shadow-xl shadow-yellow-900/20 transition-all">EXPLORE HF</button>
+                <button onClick={exploreHf} className="w-full bg-yellow-600 hover:bg-yellow-500 text-white py-3.5 rounded-xl font-black text-[10px] tracking-widest shadow-xl shadow-yellow-900/20 transition-all uppercase">Analyze Profile Content</button>
                 <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-[9px] text-slate-500 text-center leading-relaxed font-mono">
-                  Trending Models, Datasets & Spaces. Retrieval grounded via Gemini 3 + Search.
+                  Deep integration with zenieverse datasets and models. Grounded via ERNIE-vision synthesis.
                 </div>
               </div>
             )}
@@ -588,32 +600,79 @@ const App: React.FC = () => {
              </div>
              
              <div className="flex-1 overflow-auto p-8 bg-slate-950/40 relative">
-                {mode === 'HUGGING_FACE' && hfResults ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-2 duration-700">
-                    {hfResults.items?.map((item, idx) => (
-                      <div key={idx} className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl space-y-4 hover:border-yellow-600/50 hover:bg-slate-900 transition-all group shadow-lg relative overflow-hidden">
-                        <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-40 transition-opacity">
-                          {item.type === 'model' && <svg className="h-8 w-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>}
-                          {item.type === 'dataset' && <svg className="h-8 w-8 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>}
-                          {item.type === 'space' && <svg className="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>}
+                {mode === 'HUGGING_FACE' ? (
+                  <div className="space-y-8 animate-in slide-in-from-bottom-2 duration-700 h-full">
+                    {!hfResults && (
+                      <div className="bg-gradient-to-br from-yellow-500/10 to-transparent border border-yellow-500/20 rounded-3xl p-10 flex flex-col items-center text-center gap-6 shadow-2xl">
+                        <div className="h-16 w-16 bg-slate-900 rounded-3xl flex items-center justify-center text-yellow-500 border border-yellow-500/30 shadow-yellow-900/40 shadow-2xl">
+                           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${item.type === 'model' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : item.type === 'dataset' ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>
-                            {item.type}
-                          </span>
+                        <div className="flex flex-col gap-2 items-center">
+                          <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full">
+                             <div className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                             <span className="text-[9px] font-black text-yellow-500 uppercase tracking-widest">zenieverse Verified</span>
+                          </div>
+                          <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2 mt-2">Enterprise Architecture Repository</h4>
+                          <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                            Access the high-performance document reasoning protocols and ERNIE-grounded models directly from the official repository and source.
+                          </p>
                         </div>
-                        <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight truncate pr-6">{item.name}</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed font-medium line-clamp-2">{item.description}</p>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {item.tags?.map((tag: string, i: number) => (
-                            <span key={i} className="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded text-[8px] font-bold text-slate-600 uppercase tracking-tighter">#{tag}</span>
-                          ))}
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <a 
+                            href={REPO_URL} 
+                            target="_blank" 
+                            className="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-yellow-900/40 flex items-center gap-3 group"
+                          >
+                            <span>Model Repo</span>
+                            <svg className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          </a>
+                          <a 
+                            href={GITHUB_URL} 
+                            target="_blank" 
+                            className="px-8 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center gap-3 group"
+                          >
+                            <span>GitHub Source</span>
+                            <svg className="h-4 w-4 text-slate-600 group-hover:text-slate-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                          </a>
+                          <a 
+                            href={PROFILE_URL} 
+                            target="_blank" 
+                            className="px-8 py-3 bg-slate-900/50 hover:bg-slate-900 border border-slate-800 text-slate-500 hover:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 group"
+                          >
+                            <span>Profile</span>
+                            <svg className="h-4 w-4 text-slate-700 group-hover:text-slate-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                          </a>
                         </div>
-                        <a href={item.url.startsWith('http') ? item.url : `https://${item.url}`} target="_blank" className="block text-center py-2 mt-4 bg-slate-950 border border-slate-800 rounded-xl text-[10px] font-black text-slate-500 hover:text-white hover:border-slate-600 transition-all uppercase tracking-widest">
-                          View on Hugging Face
-                        </a>
                       </div>
-                    ))}
+                    )}
+                    {hfResults && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {hfResults.items?.map((item, idx) => (
+                          <div key={idx} className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl space-y-4 hover:border-yellow-600/50 hover:bg-slate-900 transition-all group shadow-lg relative overflow-hidden">
+                            <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-40 transition-opacity">
+                              {item.type === 'model' && <svg className="h-8 w-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>}
+                              {item.type === 'dataset' && <svg className="h-8 w-8 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>}
+                              {item.type === 'space' && <svg className="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${item.type === 'model' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : item.type === 'dataset' ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>
+                                {item.type}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight truncate pr-6">{item.name}</h4>
+                            <p className="text-[11px] text-slate-400 leading-relaxed font-medium line-clamp-2">{item.description}</p>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {item.tags?.map((tag: string, i: number) => (
+                                <span key={i} className="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded text-[8px] font-bold text-slate-600 uppercase tracking-tighter">#{tag}</span>
+                              ))}
+                            </div>
+                            <a href={item.url.startsWith('http') ? item.url : `https://${item.url}`} target="_blank" className="block text-center py-2 mt-4 bg-slate-950 border border-slate-800 rounded-xl text-[10px] font-black text-slate-500 hover:text-white hover:border-slate-600 transition-all uppercase tracking-widest">
+                              View on Hugging Face
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : state.result ? (
                   <div className="animate-in slide-in-from-bottom-2 duration-700 h-full">
