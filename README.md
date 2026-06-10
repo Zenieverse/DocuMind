@@ -8,6 +8,8 @@ This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/fe21821e-1045-46bb-a52c-9dd23b744c0f
 
+or https://documind-ai-764082783379.us-west1.run.app
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
